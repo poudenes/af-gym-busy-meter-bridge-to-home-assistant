@@ -2,7 +2,7 @@ services:
   af-bridge:
     build: .
     image: af-bridge:local
-    container_name: af-bridge
+    container_name: af-bridge-test
     restart: unless-stopped
     environment:
       AF_HA_URL: ${AF_HA_URL}
