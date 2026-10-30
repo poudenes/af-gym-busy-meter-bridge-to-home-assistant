@@ -1,0 +1,36 @@
+type: markdown
+content: >-
+  {%- set s = 'sensor.af_drukte' -%}
+  {%- if states(s) in ['unknown', 'unavailable'] -%}
+  <ha-alert alert-type="info">Nog geen drukte-informatie beschikbaar.</ha-alert>
+  {%- else -%}
+  {%- set nu = states(s) | int(0) -%}
+  {%- set ratio = state_attr(s, 'ratio') | float(1) -%}
+  {%- set verdict = state_attr(s, 'verdict') -%}
+  {%- set dag = state_attr(s, 'rest_of_day') or [] -%}
+  {%- set kleur = {'go': 'success', 'wait': 'warning', 'skip': 'error'}.get(verdict, 'info') -%}
+  {%- set hex = {'go': '#43a047', 'wait': '#fb8c00', 'skip': '#e53935'}.get(verdict, '#1e88e5') -%}
+  {%- set label = {'go': '💪 Nu gaan!', 'wait': '⏳ Even wachten', 'skip': '🚫 Nu liever niet'}.get(verdict, verdict) -%}
+  {%- set pct = ((ratio - 1) * 100) | round(0) | int -%}
+  {%- set later = dag[1:] if dag | length > 1 else dag -%}
+  {%- set best = (later | sort(attribute='typicalCount')) | first if later else none -%}
+  {%- set top = [dag | map(attribute='typicalCount') | max if dag else 1, nu, 1] | max -%}
+  ## 🏋️ Anytime Fitness {{ state_attr(s, 'club') }}
+
+  <ha-alert alert-type="{{ kleur }}"><b>{{ label }}</b> · {{ nu }} mensen, {{ pct | abs }}% {{ 'drukker' if pct >= 0 else 'rustiger' }} dan normaal</ha-alert>
+
+  {% if best %}⭐ **Rustigste moment vandaag:** {{ best.hour }} (±{{ best.typicalCount }} mensen){% endif %}
+
+  | Uur | Drukte |
+  |:--|:--|
+  {% for u in dag -%}
+  {%- set bar = '█' * ((u.typicalCount / top * 12) | round(0) | int) -%}
+  {%- if loop.first -%}
+  | **{{ u.hour }}** normaal | <font color="#9e9e9e">{{ bar }}</font> {{ u.typicalCount }} |
+  | **nu** echt | <font color="{{ hex }}">{{ '█' * ((nu / top * 12) | round(0) | int) }}</font> **{{ nu }}** ({{ '+' if nu >= u.typicalCount else '' }}{{ nu - u.typicalCount }}) |
+  {% else -%}
+  | {{ u.hour }} | {{ bar }} {{ u.typicalCount }}{{ ' ⭐' if best and u.hour == best.hour else '' }} |
+  {% endif -%}
+  {% endfor %}
+  <sub>Bijgewerkt om {{ (state_attr(s, 'updated') or '')[11:16] }}</sub>
+  {%- endif -%}
