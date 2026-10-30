@@ -8,9 +8,9 @@ content: >-
   {%- set ratio = state_attr(s, 'ratio') | float(1) -%}
   {%- set verdict = state_attr(s, 'verdict') -%}
   {%- set dag = state_attr(s, 'rest_of_day') or [] -%}
-  {%- set kleur = {'go': 'success', 'wait': 'warning', 'skip': 'error'}.get(verdict, 'info') -%}
-  {%- set hex = {'go': '#43a047', 'wait': '#fb8c00', 'skip': '#e53935'}.get(verdict, '#1e88e5') -%}
-  {%- set label = {'go': '💪 Nu gaan!', 'wait': '⏳ Even wachten', 'skip': '🚫 Nu liever niet'}.get(verdict, verdict) -%}
+  {%- set kleur = {'go': 'success', 'go-now': 'success', 'wait': 'warning', 'skip': 'error'}.get(verdict, 'info') -%}
+  {%- set hex = {'go': '#43a047', 'go-now': '#43a047', 'wait': '#fb8c00', 'skip': '#e53935'}.get(verdict, '#1e88e5') -%}
+  {%- set label = {'go': '💪 Nu gaan!', 'go-now': '💪 Nu gaan!', 'wait': '⏳ Even wachten', 'skip': '🚫 Nu liever niet'}.get(verdict, verdict) -%}
   {%- set pct = ((ratio - 1) * 100) | round(0) | int -%}
   {%- set later = dag[1:] if dag | length > 1 else dag -%}
   {%- set best = (later | sort(attribute='typicalCount')) | first if later else none -%}
