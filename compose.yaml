@@ -1,7 +1,7 @@
 services:
   af-bridge:
     build:
-      context: https://github.com/JOUWNAAM/af-bridge.git#main
+      context: https://github.com/poudenes/af-gym-busy-meter-bridge-to-home-assistant.git#main
     image: af-bridge:local
     container_name: af-bridge-test
     restart: unless-stopped
