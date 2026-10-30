@@ -1,6 +1,7 @@
 services:
   af-bridge:
-    build: .
+    build:
+      context: https://github.com/JOUWNAAM/af-bridge.git#main
     image: af-bridge:local
     container_name: af-bridge-test
     restart: unless-stopped
