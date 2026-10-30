@@ -1,4 +1,4 @@
-# af-bridge
+# Anytime - Gym busy meter Bridge
 
 Zet de live drukte van Anytime Fitness-clubs als sensoren in Home Assistant.
 
