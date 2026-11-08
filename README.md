@@ -1,7 +1,7 @@
 # Anytime Fitness Drukte voor Home Assistant
 
 Zet de live drukte van Anytime Fitness-clubs als sensoren in Home Assistant.
-Een custom integration, installeerbaar via HACS. Er is geen Docker, server of long-lived token meer nodig.
+Een custom integration, installeerbaar via HACS.
 
 > Gebruikt de onofficiële privé-API van de AF-app (gebaseerd op
 > [af-unofficial-mcp-server](https://github.com/Sajush00/af-unofficial-mcp-server), MIT).
@@ -20,7 +20,7 @@ Handmatig kan ook: kopieer `custom_components/af_drukte` naar `config/custom_com
 
 ## Sensoren
 
-Per club komt er een apparaat met drie sensoren. De entity_id's zijn gelijk aan die van de oude Docker-bridge, dus dashboards blijven werken.
+Per club komt er een apparaat met drie sensoren. De entity_id's zijn gelijk aan die van de vroegere Docker-bridge, dus bestaande dashboards blijven werken.
 
 | Entiteit | Waarde | Attributen |
 |---|---|---|
@@ -52,11 +52,9 @@ Markdown-kaart met advies, nu-vs-normaal en verwachting per uur: [`af-drukte-car
 
 ## Overstappen van de Docker-bridge
 
-1. Installeer de integratie zoals hierboven en log in.
-2. Stop de container (`docker compose down`) en verwijder hem eventueel uit Komodo.
-3. Trek het long-lived access token in dat de bridge gebruikte (Profiel → Beveiliging).
-
-`Dockerfile`, `compose.yaml`, `bridge.py` en `env.example` horen bij de oude bridge en zijn niet meer nodig.
+Gebruikte je eerder de Docker-bridge uit deze repo? Installeer dan de integratie, stop de container
+en trek het long-lived access token in dat de bridge gebruikte (Profiel → Beveiliging).
+De oude bridge staat nog in de git-geschiedenis (tag `docker-bridge`).
 
 ## Ontwikkelen
 
@@ -64,3 +62,9 @@ Markdown-kaart met advies, nu-vs-normaal en verwachting per uur: [`af-drukte-car
 pip install pytest-homeassistant-custom-component
 python -m pytest
 ```
+
+## Nieuwe versie uitbrengen
+
+1. Verhoog `version` in `custom_components/af_drukte/manifest.json` (bv. `1.0.1`).
+2. Commit en push.
+3. Maak een GitHub-release met tag `v1.0.1`. HACS ziet die release als update.
