@@ -1,89 +1,66 @@
-# Anytime - Gym busy meter Bridge
+# Anytime Fitness Drukte voor Home Assistant
 
 Zet de live drukte van Anytime Fitness-clubs als sensoren in Home Assistant.
+Een custom integration, installeerbaar via HACS. Er is geen Docker, server of long-lived token meer nodig.
 
-De bridge start de onofficiële [af-unofficial-mcp-server](https://github.com/Sajush00/af-unofficial-mcp-server)
-(gebruikt de privé-API van de AF-app, kan zonder waarschuwing veranderen), vraagt
-elke `AF_INTERVAL` seconden de bezetting op en pusht die via de HA REST API.
+> Gebruikt de onofficiële privé-API van de AF-app (gebaseerd op
+> [af-unofficial-mcp-server](https://github.com/Sajush00/af-unofficial-mcp-server), MIT).
+> Die API kan zonder waarschuwing veranderen.
+
+## Installatie via HACS
+
+1. HACS → menu (⋮) → **Custom repositories**
+   - Repository: `https://github.com/poudenes/af-gym-busy-meter-bridge-to-home-assistant`
+   - Type: **Integration**
+2. Zoek **Anytime Fitness Drukte**, installeer en **herstart Home Assistant**.
+3. Instellingen → Apparaten & diensten → **Integratie toevoegen** → *Anytime Fitness Drukte*.
+4. Vul het telefoonnummer van je AF-account in (`06…` mag, dat wordt `+316…`) en daarna de sms-code.
+
+Handmatig kan ook: kopieer `custom_components/af_drukte` naar `config/custom_components/` en herstart.
 
 ## Sensoren
 
-| Entiteit | Waarde | Belangrijkste attributen |
+Per club komt er een apparaat met drie sensoren. De entity_id's zijn gelijk aan die van de oude Docker-bridge, dus dashboards blijven werken.
+
+| Entiteit | Waarde | Attributen |
 |---|---|---|
-| `sensor.af_drukte` | aantal mensen nu | `club`, `typical_count`, `ratio`, `verdict`, `verdict_message`, `rest_of_day` |
+| `sensor.af_drukte` | aantal mensen nu | `club`, `af_number`, `typical_count`, `ratio`, `verdict`, `verdict_message`, `rest_of_day`, `updated` |
 | `sensor.af_drukte_normaal` | gebruikelijk aantal dit uur | |
-| `sensor.af_drukte_advies` | `go` / `wait` / `skip` | `message` |
+| `sensor.af_drukte_advies` | `go-now` / `good-time` / `normal` / `wait` / `skip` (of `no-live-data` / `no-baseline`) | `message` |
 
-Extra clubs via `AF_CLUBS` krijgen eigen sensoren, bv. `sensor.af_drukte_nl_1001`.
+Extra clubs krijgen eigen sensoren, bv. `sensor.af_drukte_nl_1001`.
 
-Let op: deze sensoren staan **niet** onder Instellingen → Entiteiten (geen unique_id),
-wel onder **Ontwikkelaarshulpmiddelen → Toestanden**. Na een HA-herstart zijn ze
-maximaal één interval "onbekend".
+Het advies vergelijkt het live aantal met het gebruikelijke aantal voor dit uur:
+≤ 50 % `go-now`, ≤ 85 % `good-time`, ≤ 115 % `normal`, ≤ 150 % `wait`, daarboven `skip`.
+Het uur wordt bepaald met de tijdzone van Home Assistant.
 
-## Installatie
+## Opties
 
-1. **Repo op de server zetten**
-   - Komodo: maak een Stack in modus *Git Repo* met deze repo, of clone naar
-     `/etc/komodo/repos/main/af-bridge` en gebruik *Files on Server*.
-     De map moet binnen het bereik van Periphery liggen (`/etc/komodo/...`),
-     anders krijg je `Failed to validate run directory ... No such file or directory`.
-   - Zonder Komodo: `git clone` en verder in die map werken.
+Instellingen → Apparaten & diensten → Anytime Fitness Drukte → **Configureren**:
 
-2. **Variabelen** (zie `.env.example`): `AF_HA_URL`, `AF_HA_TOKEN`, `AF_INTERVAL`, `AF_CLUBS`.
-   Zet ze in `.env` naast `compose.yaml` of in je globale env van Komodo.
-   - Gebruik het **IP-adres** van HA, geen `.local`-naam.
-   - Het token moet van een **beheerder** zijn (Profiel → Beveiliging → Long-lived access tokens).
-   - Elke variabele op een eigen regel; een token is ±183 tekens.
+- **Extra clubs**: kies uit de clubs binnen 25 km van je thuisclub, of typ een clubnummer (bv. `NL-1001`).
+- **Interval**: hoe vaak de drukte wordt opgehaald (standaard 300 s, minimaal 60 s).
 
-3. **Bouwen**
-   ```
-   docker compose build
-   ```
+## Sessie verlopen
 
-4. **Eenmalig inloggen bij Anytime Fitness** (sms-code naar het telefoonnummer van je AF-account):
-   ```
-   docker compose run --rm af-bridge /app/af/.venv/bin/af-gym login --phone +316XXXXXXXX
-   ```
-   Het token komt in `/var/docker/af-bridge` en blijft bewaard bij updates.
-
-5. **Testen zonder naar HA te sturen**
-   ```
-   docker compose run --rm af-bridge /app/af/.venv/bin/python /app/bridge.py --test
-   ```
-   Je hoort JSON te zien met o.a. `currentMemberCount`, `typicalCount` en `restOfDay`.
-
-6. **Starten**: `docker compose up -d` (of Deploy in Komodo; na wijzigingen in
-   `bridge.py`/`Dockerfile` deployen met `--build`).
-
-De eerste logregel toont `HA_URL=..., tokenlengte=183`. Daarna per poll bv.
-`sensor.af_drukte = 11 (normaal 6, skip)`.
-
-## Problemen oplossen
-
-| Log | Oorzaak / oplossing |
-|---|---|
-| `HA antwoordde 401 ... token ongeldig` | Token fout of ingetrokken. Snel vervangen, anders blokkeert HA het IP. |
-| `HA antwoordde 403` | Het IP van de server staat in HA's `ip_bans.yaml`, of het token is van een niet-beheerder. Verwijder de ban en **herstart HA**. |
-| `ConnectError` | `AF_HA_URL` niet bereikbaar vanuit de container. |
-| `HA_URL en HA_TOKEN moeten gezet zijn` | Variabelen komen de container niet in. |
-| `ophalen bij AF mislukt` | AF-sessie verlopen (opnieuw stap 4) of de app-API is veranderd. |
-
-Snelle test van token en IP vanuit de container (verwacht `200 {"message":"API running."}`):
-```
-docker exec af-bridge /app/af/.venv/bin/python -c "import os,httpx; r=httpx.get(os.environ['AF_HA_URL']+'/api/', headers={'Authorization':'Bearer '+os.environ['AF_HA_TOKEN']}); print(r.status_code, r.text)"
-```
+De integratie ververst het AF-token zelf. Verloopt de sessie toch, dan krijg je in Home Assistant een melding
+**Opnieuw configureren**. Je krijgt dan een nieuwe sms-code en daarna draait alles weer.
 
 ## Dashboard
 
-Markdown-kaart met advies, nu-vs-normaal en verwachting per uur:
-[`dashboard/af-drukte-card.yaml`](dashboard/af-drukte-card.yaml).
+Markdown-kaart met advies, nu-vs-normaal en verwachting per uur: [`af-drukte-card.yaml`](af-drukte-card.yaml).
 
-## Onafhankelijk blijven van het originele project
+## Overstappen van de Docker-bridge
 
-De `Dockerfile` bouwt vanaf een vaste commit van de upstream repo. Fork die repo
-op GitHub en zet je fork als bron, dan kun je blijven bouwen als het origineel
-verdwijnt:
+1. Installeer de integratie zoals hierboven en log in.
+2. Stop de container (`docker compose down`) en verwijder hem eventueel uit Komodo.
+3. Trek het long-lived access token in dat de bridge gebruikte (Profiel → Beveiliging).
+
+`Dockerfile`, `compose.yaml`, `bridge.py` en `env.example` horen bij de oude bridge en zijn niet meer nodig.
+
+## Ontwikkelen
+
 ```
-docker compose build --build-arg AF_REPO=https://github.com/JOUWNAAM/af-unofficial-mcp-server.git
+pip install pytest-homeassistant-custom-component
+python -m pytest
 ```
-of pas de standaardwaarde van `AF_REPO` in de `Dockerfile` aan.

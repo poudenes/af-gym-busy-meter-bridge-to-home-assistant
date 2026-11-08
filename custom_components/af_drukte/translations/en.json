@@ -1,0 +1,75 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Sign in to Anytime Fitness",
+        "description": "Enter the phone number of your Anytime Fitness app account. You will receive an SMS code.",
+        "data": {
+          "phone": "Phone number"
+        },
+        "data_description": {
+          "phone": "International format, e.g. +31612345678 (06… is converted to +316…)."
+        }
+      },
+      "code": {
+        "title": "Enter SMS code",
+        "description": "Enter the code that was sent to {phone}.",
+        "data": {
+          "code": "SMS code"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Sign in again",
+        "description": "Your Anytime Fitness session has expired. Submit to send a new SMS code to {phone}."
+      }
+    },
+    "error": {
+      "invalid_phone": "Invalid phone number.",
+      "unknown_account": "Could not start a login for this number. Is it the number of your AF account?",
+      "invalid_code": "The code is incorrect or has expired.",
+      "cannot_connect": "Could not connect to Anytime Fitness."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reauth_successful": "Signed in again successfully."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Clubs and interval",
+        "description": "Your home club is always included. Pick extra clubs nearby or type a club number (e.g. NL-1001).",
+        "data": {
+          "clubs": "Extra clubs",
+          "scan_interval": "Update interval"
+        },
+        "data_description": {
+          "clubs": "Clubs within 25 km of your home club; you can also type a club number.",
+          "scan_interval": "How often occupancy is fetched (seconds)."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "current": {
+        "name": "Occupancy"
+      },
+      "typical": {
+        "name": "Typical occupancy"
+      },
+      "verdict": {
+        "name": "Advice",
+        "state": {
+          "go-now": "Go now",
+          "good-time": "Good time",
+          "normal": "Normal",
+          "wait": "Wait",
+          "skip": "Skip",
+          "no-live-data": "No live data",
+          "no-baseline": "No baseline"
+        }
+      }
+    }
+  }
+}

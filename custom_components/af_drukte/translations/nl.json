@@ -1,0 +1,75 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Inloggen bij Anytime Fitness",
+        "description": "Vul het telefoonnummer van je Anytime Fitness-app-account in. Je krijgt een sms-code.",
+        "data": {
+          "phone": "Telefoonnummer"
+        },
+        "data_description": {
+          "phone": "Internationaal formaat, bv. +31612345678 (06… wordt omgezet naar +316…)."
+        }
+      },
+      "code": {
+        "title": "Sms-code invullen",
+        "description": "Vul de code in die naar {phone} is gestuurd.",
+        "data": {
+          "code": "Sms-code"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Opnieuw inloggen",
+        "description": "Je Anytime Fitness-sessie is verlopen. Verstuur om een nieuwe sms-code naar {phone} te sturen."
+      }
+    },
+    "error": {
+      "invalid_phone": "Ongeldig telefoonnummer.",
+      "unknown_account": "Kon geen login starten voor dit nummer. Is het het nummer van je AF-account?",
+      "invalid_code": "De code is onjuist of verlopen.",
+      "cannot_connect": "Kan geen verbinding maken met Anytime Fitness."
+    },
+    "abort": {
+      "already_configured": "Dit account is al ingesteld.",
+      "reauth_successful": "Opnieuw ingelogd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Clubs en interval",
+        "description": "Je thuisclub zit er altijd bij. Kies extra clubs in de buurt of typ een clubnummer (bv. NL-1001).",
+        "data": {
+          "clubs": "Extra clubs",
+          "scan_interval": "Interval"
+        },
+        "data_description": {
+          "clubs": "Clubs binnen 25 km van je thuisclub; je kunt ook een clubnummer typen.",
+          "scan_interval": "Hoe vaak de drukte wordt opgehaald (seconden)."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "current": {
+        "name": "Drukte"
+      },
+      "typical": {
+        "name": "Drukte normaal"
+      },
+      "verdict": {
+        "name": "Advies",
+        "state": {
+          "go-now": "Nu gaan",
+          "good-time": "Goed moment",
+          "normal": "Normaal",
+          "wait": "Even wachten",
+          "skip": "Liever niet",
+          "no-live-data": "Geen live data",
+          "no-baseline": "Geen vergelijking"
+        }
+      }
+    }
+  }
+}
