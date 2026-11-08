@@ -1,7 +1,8 @@
 """Async client voor de (onofficiële) Anytime Fitness app-API.
 
-Gebaseerd op af-unofficial-mcp-server van Sajush Arukat (MIT-licentie):
+Gebaseerd op af-unofficial-mcp-server van Sajush Arukat:
 https://github.com/Sajush00/af-unofficial-mcp-server
+Copyright (c) 2026 Sajush Arukat, uitgebracht onder de MIT-licentie.
 
 Let op: dit is de privé-API van de AF-app en kan zonder waarschuwing veranderen.
 """
